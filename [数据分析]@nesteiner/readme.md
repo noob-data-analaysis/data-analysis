@@ -1,9 +1,12 @@
-### Task: Data Science Tutorials  
+### TODO
+1. learning network
+### Doing 
+1. learning_curve
+2. evaluate
+3. tuned model
 
-### Data basic
+### Done
+1. breast cancer predict
+2. titanic survivor predidct
 
-### Getting started
-
-### Intro to Stats Learning
-
-### End to end examples
+代码并不会提交频繁，主要是因为很多东西需要调试和优化
