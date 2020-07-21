@@ -1,4 +1,5 @@
-## 什么是`TunedModel`
+[TOC]
+## 1. 什么是`TunedModel`
 为了得到更好的模型，我们需要调试模型的参数
 还好MLJ为我们提供了`TunedModel`，我们要做的就是把原来的模型包装起来，进行调试
 ```julia
@@ -10,9 +11,9 @@ self_tuning_model = TunedModel(model = model,
 							   weights = weights)
 self_tuning_mach = machine(self_tuning_model, train_features, train_labels)
 ```
-## 怎么调优模型 
+## 2. 怎么调优模型 
 最重要的是参数范围`range`，参数范围的搜索策略`tuning`和判断最优结果的指标`measure`
-#### `range`
+#### 2.1 `range`
 `range`需要指定`model`,`model`的参数`:param`，范围和取值(scale)
 不过scale我不知道怎么回事，不懂，好像是取值规定，比如`:linear`是均匀，其他的比如`:log`我就不知道了
 
@@ -40,7 +41,7 @@ r1 = range(model, :param, values = [v1, v2, ...])
 
 ps: 其实`range(model, :param, lower, upper, scale = :linear)` 跟 `range(model, :param, values = lower:upper)`是一样的
 
-#### `tuning`
+#### 2.2 `tuning`
 `tuning`有两种策略，网格搜索和随机搜索
 >   Grid(goal=nothing, resolution=10, rng=Random.GLOBAL_RNG, shuffle=true)
 
@@ -59,14 +60,14 @@ ps: 从slack上作者给我的解释 **resolution is number of points in each di
 	hyperparameter domains, with customizable priors in each dimension.
 
 
-#### `measure`
+#### 2.3 `measure`
 `measure`是为了衡量模型调整参数后的好坏而引入的指标，我们只讨论分类和回归的情况
 [文档在这里](https://alan-turing-institute.github.io/MLJ.jl/stable/performance_measures/)
 ps: 也可以指定多个`measure`
 #### `weights`
 也可以指定权重，用数组向量表示
 
-#### `resampling`
+#### 2.4 `resampling`
 内置的重采样策略有三种，
 `Holdout`: 将数据集分为`train`和`test`两部分，比例由`fraction_train`指定
 `CV`: K折交叉验证
@@ -77,18 +78,18 @@ ps: 也可以指定多个`measure`
 using StableRNGs
 rng = StableRNG(1234)
 ```
-## 怎么得到最优模型
+## 3. 怎么得到最优模型
 ```julia
 fit!(self_tuning_mach)
 best_model = fitted_params(sefl_tuning_mach).best_model
 ```
-## 接下来的工作
+## 4. 接下来的工作
 如果我们对这个模型有疑问怎么办？
 我们可以对这个最优模型进行评估，或是通过`learning_curve`来观察训练过程
 当然，`evaluate`和`learning_curve`会单独写文档，因为内容有点多
 
-## 贴个代码试试
-#### 先试试单个参数调整
+## 5. 贴个代码试试
+#### 5.1 先试试单个参数调整
 ```julia
 using MLJ
 X = MLJ.table(rand(100,10))
@@ -134,7 +135,7 @@ DecisionTreeRegressor(
 ```
 好吧，好像没什么变化
 
-#### 再试试多个参数调整，顺便强化一下`tree_model`，进化成`forest`
+#### 5.2 再试试多个参数调整，顺便强化一下`tree_model`，进化成`forest`
 没办法，我没系统学过决策树，不知道里面的参数含义
 ```julia
 forest_model = EnsembleModel(atom = tree_model)
@@ -188,6 +189,6 @@ DeterministicEnsembleModel(
 ```
 娘的，好像还是没什么变化
 
-## 疑问
+## 6. 疑问
 1. 在指定`range`时，`scale`的作用
 2. 调整策略`tuning`中`Grid`的参数，`Grid`对训练模型个数的影响
