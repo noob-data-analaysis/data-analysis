@@ -1,6 +1,6 @@
 [TOC]
 ## 0. [非常重要] 类型扩展
-TODO image here
+
 我们先准备下数据，以波士顿房价为例，不过我们不用**MLJ**的`@load_boston`了，因为我们有许多工作需要`DataFrame`来完成
 ```julia
 using MLJ
@@ -10,7 +10,8 @@ using RDatasets
 boston = dataset("MASS", "Boston");
 y, X = unpack(boston, col -> col == :MedV, col -> col != :MedV) # MedV 平均房价特征
 ```
-**tips** unpack拆包数据集，可以分别用函数指定需要的数据集
+**tips** 
+unpack拆包数据集，可以分别用函数指定需要的数据集
 ### 0.1 科学类型
 #### 0.1.1 科学类型介绍
 **MLJ**扩展出了一系列类型来更好地解释数据集，这种类型叫做[科学类型](https://alan-turing-institute.github.io/DataScienceTutorials.jl/data/scitype/#type_to_type_coercion)
@@ -259,7 +260,8 @@ yhat = predict(tree, rows=test)
 ```julia
 mode.(yhat)
 ```
-
+**tips** 
+你如果想在预测的时候直接得到分类，就用`predict_mode`
 ```julia
 setosa
 versicolor
@@ -285,7 +287,7 @@ yhat = predict(clf, X)
 已有位小伙伴已经翻译好了文档，大家可以看看
 https://github.com/noob-data-analaysis/data-analysis/blob/master/%5B%E6%95%B0%E6%8D%AE%E5%8F%98%E6%8D%A2%5D%40AquaIndigo/%E6%95%B0%E6%8D%AE%E5%8F%98%E6%8D%A2.md
 ## 1. 数据探索
-TODO image here
+
 ### 1.1 总览 `showtable`
 `showtable(X) # 这个大家在jupyter notebook里试一下就好了，我这里不能导出markdown， 我让别人帮我试了一下也有问题，那就是作者的问题了`
 ### 1.2 查看每列的科学类型 `schema`
@@ -376,7 +378,7 @@ desribe(X, :symbol => sum)
 | 13  | LStat    | 6402.45  |
 
 ## 2. 数据清洗
-TODO image here
+
 ### 2.1 特征选择 `FeatureSelector`
 **文档**
 `FeatureSelector(features=Symbol[])`
@@ -446,7 +448,7 @@ julia> w = MLJ.transform(mach, df)
 | x2     | Union{Missing, Float64} | Continuous |
 
 ## 3. 数据转换
-TODO image here
+
 ### 3.1 数据标准化 `Standardizer`
 **文档**
 `   Standardizer(; features=Symbol[], ignore=false, ordered_factor=false, count=false)
@@ -575,7 +577,8 @@ w = transform(discretizer, v)
 | 39       | 4        |
 | 91       | 10       |
 
-**tips** 用`convert(Vector{Int}, w)`获得分类数据的排序情况
+**tips** 
+用`convert(Vector{Int}, w)`获得分类数据的排序情况
 
 2. 分类变量
    1. 有序变量 `OrderedFactor`
