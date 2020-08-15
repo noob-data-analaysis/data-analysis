@@ -1,3 +1,9 @@
+## TODO
+- [ ] Titanic Survive prediction
+- [ ] breast cancer prediction
+- [ ] boston housing price prediction
+
+
 ## Done
 1. 初学介绍
 - docs/introduction.md
@@ -14,7 +20,7 @@
 - docs/data.md
 - mindmap/MLH数据处理.xmind
 ## left
-1. learning_curve
-2. roc
+1. ensemble 文档及使用
+2. precision_recall_curve
 
 
