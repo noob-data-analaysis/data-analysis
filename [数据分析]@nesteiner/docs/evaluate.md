@@ -1,4 +1,5 @@
 [TOC]
+![image](images/evaluate/1.png)
 ## 1. 一个例子
 数据准备
 ```julia
@@ -155,12 +156,141 @@ _.per_observation = [[[0.8, 0.0]], [[1.6, 0.0]], [[3.2, 0.0]], [[1.4092753247646
 权重，无所谓了，必要的时候才设
 
 ## 3. 评估模型的图表
-跟你们说一下，我好像问了很多菜鸟的问题，作者太忙没时间理我:rofl:
-我怕时间耽搁太久，先发出来好了
-TODO 学习曲线
+### 3.1 学习曲线
+```julia
+  curve = learning_curve(mach; resolution=30,
+                               resampling=Holdout(),
+                               repeats=1,
+                               measure=default_measure(machine.model),
+                               rows=nothing,
+                               weights=nothing,
+                               operation=predict,
+                               range=nothing,
+                               acceleration=default_resource(),
+                               acceleration_grid=CPU1(),
+                               rngs=nothing,
+                               rng_name=nothing)
+```
+其实只是名字一样，给定一个范围`range`(only one)，得到一个曲线`curve`，这个曲线表示这个范围内的所有性能（指标）
+上面那个`resolution=30`说明`learning_curve`使用`Grid`作获取参数的策略
 
-TODO ROC
+**example** 观察一个模型的性能
+```julia
+X, y = @load_boston
 
-TODO PR
+@load RidgeRegressor pkg=MultivariateStats
+model = RidgeRegressor()
+mach = machine(model, X, y)
+
+r_lambda = range(model, :lambda, lower = 0.01, upper = 10.0, scale = :linear)
+```
+**默认重采样策略Holdout**
+```julia
+curves = learning_curve(mach,
+                        range = r_lambda,
+                        measure = rms)
+plot(curves.parameter_values,
+     curves.measurements,
+     xlab = curves.parameter_name,
+     ylab = "Holdout estimate of RMS error")
+
+```
+![image](images/evaluate/newplot2.png)
+**指定重采样策略**
+```julia
+using Plots
+rng = StableRNG(1234)
+
+curves = learning_curve(mach,
+                        resampling = CV(nfolds = 6, rng = rng),
+                        range = r_lambda,
+                        measure = rms)
+plot(curves.parameter_values,
+     curves.measurements,
+     xlab = curves.parameter_name,
+     ylab = "Holdout estimate of RMS error")
+
+```
+
+![image](images/evaluate/newplot1.png)
+
+### 3.2 ROC
+```julia
+fprs, tprs, ts = roc_curve(ŷ, y) = roc(ŷ, y)
+```
+如果我们的测试数据集类别分布大致均衡的时候我们可以用ROC曲线
+给定基本事实y，两类概率预测ŷ，返回ROC曲线。ts返回阈值范围内的真阳性率，假阳性率
+其中
+1. fprs: 假阳性率
+2. tprs: 真阳性率
+3. ts: thresholds 阈值
+
+**example** 
+这里我不给出代码了，因为`roc`曲线评估的是分类问题，加载数据集，处理那些操作太多了，我就先放图片好了，具体的流程在**Titanic幸存预测里**
+![image](images/evaluate/newplot3.png)
+### 3.3 PR
+当数据集类别分布非常不均衡的时候采用PR曲线
+但是很遗憾，文档里找不到这个东西
+
+### 3.3 真正的学习曲线
+虽然我找不到这个实现，但是我自己先做了一个
+```julia
+function plot_learning_curve(model, X, y)
+    mach = machine(model, X, y)
+    training_size_iter = 5:10:length(y)
+    errors = ones(length(training_size_iter), 2)
+    rng = StableRNG(1234)
+
+    row = 1                     # for iterate
+    for training_size = training_size_iter
+        train, cv = partition(1:training_size, 0.7, rng = rng)
+        fit_only!(mach, rows = train)
+        
+        m_train = length(train)
+        Jtrain = (1 / (2 * m_train)) * reduce(+, map(x -> x^2, predict(mach, rows = train) - y[train]))
+
+        m_cv = length(cv)
+        Jcv = (1 / (2 * m_cv)) * reduce(+, map(x -> x^2, predict(mach, rows = cv) - y[cv]))
+
+        errors[row, :] = [Jtrain, Jcv]
+
+        row += 1
+    end
+
+    plot(errors,
+         label = ["Jtrain" "Jcv"],
+         color = [:red :blue],
+         xlab = "training size",
+         ylab = "error")
+
+
+end
+```
+
+试试看
+```julia
+@load RidgeRegressor pkg=MultivariateStats
+model = RidgeRegressor()
+X, y = @load_boston
+
+# Tuning
+rng = StableRNG(1234)
+r_lambda = range(model, :lambda, lower = 0.1, upper = 10.0, scale = :linear)
+tuning = Grid(resolution = 100, rng = rng)
+resampling = CV(nfolds = 6, rng = rng)
+self_tuning_model = TunedModel(model = model,
+                               range = r_lambda,
+                               tuning = tuning,
+                               resampling = resampling,
+                               measure = l1)
+self_tuning_mach = machine(self_tuning_model, X, y)
+fit!(self_tuning_mach, force = true)
+
+best_model = fitted_params(self_tuning_mach).best_model
+
+plot_learning_curve(best_model, X, y)
+```
+![image](images/evaluate/newplot4.png)
+看着有点不对啊:yum:
 
 

@@ -130,20 +130,12 @@ _.per_observation = [missing, [[4.84, 1.0, ..., 7.41], [3.67, 0.981, ..., 7.29],
 
 还不错，哟系
 ## 3. 组合模型
-### 3.1 减小偏差 AdaBoost
-**MLJ**的资料里找不到这个，但是我发现在**MLJ**中可以搜索到`AdaBoost`模型，`RandomForest`也是一样的
-### 3.2 减小方差 RandomForest
-虽然**MLJ**中提供了**RandomForest**的模型，但是我们可以用`EnsembleModel`自己造一个
-```julia
-X, y = @load_boston
-@load DecisionTreeRegressor
+### 3.1 减小偏差 Boost
 
-forest_model = EnsembleModel(atom = DecisionTreeRegressor(), n = 100) # atom 为分类器， n为分类器的个数
-random_forest = machine(forest_model, X, y)
-```
+### 3.2 减小方差 Bagging
 
 ### 3.3 提升预测 Stacking
-文档里只找到关于学习网络的`Stacking`策略，好像对普通模型没有讲，我等会再去问问吧
+
 ### 3.4 简化操作 pipeline
 `pipeline`为我们提供了一条龙服务，就像**流水线**一样从数据准备到数据分析一步到位
 先让我们看看需要经过多次处理的例子

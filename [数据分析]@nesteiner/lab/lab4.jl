@@ -3,6 +3,7 @@ import RDatasets: dataset
 import DataFrames: DataFrame, describe, select, Not
 import StatsBase: countmap, cor, var
 using PrettyPrinting
+using Plots
 
 smarket = dataset("ISLR", "Smarket")
 @show size(smarket)
@@ -40,20 +41,40 @@ fit!(clf, rows = train)
 ŷ = predict_mode(clf, rows = test)
 accuracy(ŷ, y[test])
 
-caravan = dataset("ISLR", "Caravan")
-y, X = unpack(caravan, ==(:Purchase), col -> true)
-mstd = machine(Standardizer(), X)
-fit!(mstd)
-Xs = MLJ.transform(mstd, X)
-var(Xs[:,1])
 
-# TODO caravan
-@load KNNClassifier pkg=NearestNeighbors
+# TODO ROC
+caravan = dataset("ISLR", "Caravan")
+y, X = unpack(caravan, ==(:Purchase), colname -> true)
+mstd = fit!(machine(Standardizer(), X))
+Xs = transform(mstd, X)
+
 test = 1:1000
 train = last(test) + 1:nrows(Xs)
 
+# TODO test roc with KNN
+@load KNNClassifier pkg=NearestNeighbors
 clf = machine(KNNClassifier(K=3), Xs, y)
-fit!(clf, rows = train)
-ŷ = predict_mode(clf, rows = test)
+fit!(clf, rows=train)
+ŷ = predict(clf, rows=test)
+fprs, tprs, thresholds = roc(ŷ, y[test])
 
-accuracy(ŷ, y[test])
+
+plot(fprs, tprs)
+# TODO test roc with logistic
+@load LogisticClassifier pkg=MLJLinearModels
+clf = machine(LogisticClassifier(), Xs, y)
+fit!(clf, rows=train)
+ŷ = predict(clf, rows=test)
+auc(ŷ, y[test])
+
+fprs, tprs, thresholds = roc(ŷ, y[test])
+plot(fprs, tprs)
+
+# TODO test roc with decisiontree
+@load DecisionTreeClassifier pkg=DecisionTree
+clf = machine(DecisionTreeClassifier(), Xs, y)
+fit!(clf, rows=train)
+ŷ = predict(clf, rows=test)
+fprs, tprs, thresholds = roc(ŷ, y[test])
+
+plot(fprs, tprs)

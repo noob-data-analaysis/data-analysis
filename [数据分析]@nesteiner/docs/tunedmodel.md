@@ -1,4 +1,5 @@
 [TOC]
+![image](images/tunedmodels/1.png)
 ## 1. 什么是`TunedModel`
 为了得到更好的模型，我们需要调试模型的参数
 还好MLJ为我们提供了`TunedModel`，我们要做的就是把原来的模型包装起来，进行调试
@@ -15,8 +16,13 @@ self_tuning_mach = machine(self_tuning_model, train_features, train_labels)
 最重要的是参数范围`range`，参数范围的搜索策略`tuning`和判断最优结果的指标`measure`
 #### 2.1 `range`
 `range`需要指定`model`,`model`的参数`:param`，范围和取值(scale)
-不过scale我不知道怎么回事，不懂，好像是取值规定，比如`:linear`是均匀，其他的比如`:log`我就不知道了
-
+scale 最近我好像弄懂了，具体指取值的做法，比如`:linear`指均匀取值，`:log10`指这种情况（瞎猜的），虽然取值时的横轴还是`1, 2, 3, 4`，但是取值的纵轴却是指数级变化，可以自己画一下看看
+```julia
+using Plots
+r = range(Int, :junk, lower = 1, upper = 100, scale = :log10)
+plot(1:10, iterator(r, 10)) 
+```
+![image](images/tunedmodels/2.png)
 [数值]单个参数
 ```julia
 r = range(model, :param, lower, upper, scale) 
@@ -39,18 +45,102 @@ r1 = range(model, :param, values = [v1, v2, ...])
 	left-unbounded, or doubly unbounded, respectively. Note upper=Inf and
 	lower=-Inf are allowed.
 
-ps: 其实`range(model, :param, lower, upper, scale = :linear)` 跟 `range(model, :param, values = lower:upper)`是一样的
+例子
+**example1: 对范围进行取值**
+```julia
+@load LogisticClassifier pkg=MLJLinearModels
+clf = LogisticClassifier()
+# 调参的时候记得看这些参数是什么哟
+r_lambda = range(clf, :lambda, lower = -1.0, upper = 5.0, scale = :linear)
+r_gamma = range(clf,  :gamma, lower = -1.0, upper = 10.0, scale = :linear)
+```
+
+```julia
+julia> iterator(r_lambda, 10)
+10-element Array{Float64,1}:
+  0.01
+  1.12
+  2.23
+  3.34
+  4.45
+  5.56
+  6.67
+  7.78
+  8.89
+ 10.0
+```
+
+
+**example2: range范围内参数不够时**
+
+```julia
+r = range(Int, :junk, lower = 1, upper = 10, scale = :linear)
+```
+
+```julia
+julia> iterator(r, 100)
+10-element Array{Int64,1}:
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+```
+
 
 #### 2.2 `tuning`
+确定好调参的范围`range`后，接下来是怎么寻找参数调试的调整策略`tuning`了
 `tuning`有两种策略，网格搜索和随机搜索
+##### 2.2.1 Grid
 >   Grid(goal=nothing, resolution=10, rng=Random.GLOBAL_RNG, shuffle=true)
 
 	Instantiate a Cartesian grid-based hyperparameter tuning strategy with a
 	specified number of grid points as goal, or using a specified default
 	resolution in each numeric dimension.
-具体可以看[这篇文章](https://www.cnblogs.com/Vancuicide/p/10530583.html)
-但是这些参数有点特别，我不懂`goal`的意思，google了半天也没找到，本来想用`sklearn`类比一下的，可是参数有点特别，希望有人能为我解答
-ps: 从slack上作者给我的解释 **resolution is number of points in each dim**，还好我这个菜鸟问了这么多没把我弄死
+	
+可以参考[这篇文章](https://www.cnblogs.com/Vancuicide/p/10530583.html)
+
+网格你们知道吧，我这拿两个范围组成的网格举例
+![image](images/tunedmodels/3.png)
+1. goal
+	`goal`就是上面那个网格所有的格子数
+		
+2. resolution
+	`resolution`指每个范围（即每个轴）分成多少块
+ps: 如果你提供的范围数据量不够的话，就算你设了再大的`resolution`，最终`resolution`还是以这个范围的最大可分的次数为准
+
+**example**
+在调整时设置两个范围，`TunedModel`需要训练的模型总量`n`与`Grid`的关系（其实就是上面图片的有多少个横的单元格，有多个竖的单元格，把他们乘起来）**
+ps: `@doc TunedModel` 你会发现`n = default_n(tuning, range)`
+```julia
+@load LogisticClassifier pkg=MLJLinearModels
+clf = LogisticClassifier()
+# 调参的时候记得看这些参数是什么哟
+r_lambda = range(clf, :lambda, lower = -1.0, upper = 5.0, scale = :linear)
+r_gamma = range(clf,  :gamma, lower = -1.0, upper = 10.0, scale = :linear)
+```
+单个范围调整时的训练模型数
+```julia
+import MLJTuning.default_n
+tuning = Grid(resolution = 10)
+default_n(tuning, r_lambda) == 10 # true
+default_n(tuning, r_gamma) == 10 # true
+default_n(tuning, range(Int, :junk, lower=1, upper=5)) == 5 # true
+```
+多个范围调整时的训练模型数
+```julia
+default_n(tuning, [r_lambda, r_gamma]) == 100 # true 10 x 10
+# 范围不够用时
+r_penalty = range(clf, :penalty, values = [:l1, :l2]) # iterator最大能取两个
+default_n(tuning, [r_penalty, r_gamma]) == 20 # true  2 x 10
+```
+
+##### 2.2.2 RandomSearch
 >   RandomSearch(bounded=Distributions.Uniform,
 	             positive_unbounded=Distributions.Gamma,
                  other=Distributions.Normal,
@@ -58,16 +148,18 @@ ps: 从slack上作者给我的解释 **resolution is number of points in each di
 
 	Instantiate a random search tuning strategy, for searching over Cartesian
 	hyperparameter domains, with customizable priors in each dimension.
-
+	
+	TODO 解释Random怎么取值
 
 #### 2.3 `measure`
 `measure`是为了衡量模型调整参数后的好坏而引入的指标，我们只讨论分类和回归的情况
 [文档在这里](https://alan-turing-institute.github.io/MLJ.jl/stable/performance_measures/)
-ps: 也可以指定多个`measure`
-#### `weights`
+
+如果我们是指了多么`measure`，那么只有第一个`measure`会被作为评估的指标，其他的指标会在模型训练的报告中呈现
+#### 2.4 `weights`
 也可以指定权重，用数组向量表示
 
-#### 2.4 `resampling`
+#### 2.5 `resampling`
 内置的重采样策略有三种，
 `Holdout`: 将数据集分为`train`和`test`两部分，比例由`fraction_train`指定
 `CV`: K折交叉验证
@@ -189,6 +281,4 @@ DeterministicEnsembleModel(
 ```
 娘的，好像还是没什么变化
 
-## 6. 疑问
-1. 在指定`range`时，`scale`的作用
-2. 调整策略`tuning`中`Grid`的参数，`Grid`对训练模型个数的影响
+
