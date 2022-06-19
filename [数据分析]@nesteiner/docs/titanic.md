@@ -1,34 +1,4 @@
 
-# Table of Contents
-
-1.  [项目介绍](#orga8d42e0)
-2.  [数据探索](#org1a5b4d3)
-    1.  [字段含义](#org5a7fc54)
-    2.  [字段科学类型](#org660f3bf)
-    3.  [描述数据](#org21ab3af)
-3.  [数据处理](#org27b79b7)
-    1.  [对 train.csv 的数据处理策略](#org4189b8f)
-        1.  [填充缺失值](#orgc5e7aed)
-        2.  [生成新的特征](#org1822525)
-        3.  [对 Embarked 进行 OneHot 编码](#org98662b5)
-        4.  [丢弃不用的特征](#org8213fbf)
-    2.  [对 test.csv 的数据处理策略](#org8826108)
-    3.  [数据处理模型](#orge896e0b)
-    4.  [数据相关性](#org85cda60)
-4.  [模型训练](#orgf273675)
-    1.  [引入模型](#orgd55df76)
-    2.  [拆解数据](#orgf352a58)
-    3.  [模型训练与调试](#org5e54ce1)
-5.  [投入使用](#org72b5566)
-    1.  [加载数据](#orgb06b911)
-    2.  [处理数据](#orgb950f85)
-    3.  [生成预测结果](#orgb0aa8ba)
-    4.  [上传数据](#org601d791)
-
-
-
-<a id="orga8d42e0"></a>
-
 # 项目介绍
 
 最近终于去学习 Julia 了，重温了下没做完的 Titanic 项目，打算做完  
@@ -44,12 +14,10 @@
 到提交的时候，数据表中的字段 PassengerId(Integer) 与 Survived(Integer)  
 
 
-<a id="org1a5b4d3"></a>
 
 # 数据探索
 
 
-<a id="org5a7fc54"></a>
 
 ## 字段含义
 
@@ -160,7 +128,6 @@
 </table>
 
 
-<a id="org660f3bf"></a>
 
 ## 字段科学类型
 
@@ -173,7 +140,6 @@
 ![img](images/titanic/2021-08-19_00-32-57_screenshot.png)  
 
 
-<a id="org21ab3af"></a>
 
 ## 描述数据
 
@@ -184,7 +150,6 @@
 ![img](images/titanic/2021-08-19_00-33-10_screenshot.png)  
 
 
-<a id="org27b79b7"></a>
 
 # 数据处理
 
@@ -195,7 +160,6 @@
 -   生成新的字段，或者优化数据
 
 
-<a id="org4189b8f"></a>
 
 ## 对 train.csv 的数据处理策略
 
@@ -234,14 +198,12 @@ f(x) = log(x + 1)
 接下来定义数据处理模型  
 
 
-<a id="orgc5e7aed"></a>
 
 ### 填充缺失值
 
     fillMissingModel = FillImputer(features=[:Age, :Embarked], continuous_fill = e -> skipmissing(e) |> mode, finite_fill = e -> skipmissing(e) |> mode)
 
 
-<a id="org1822525"></a>
 
 ### 生成新的特征
 
@@ -273,21 +235,18 @@ f(x) = log(x + 1)
     end
 
 
-<a id="org98662b5"></a>
 
 ### 对 Embarked 进行 OneHot 编码
 
     encodeModel = OneHotEncoder(features=[:Embarked, :FeatureA])
 
 
-<a id="org8213fbf"></a>
 
 ### 丢弃不用的特征
 
     dropUnusedModel = FeatureSelector(features = [:Age, :Sex, :SibSp, :Parch, :Cabin, :PassengerId, :Name, :Ticket], ignore=true)
 
 
-<a id="org8826108"></a>
 
 ## 对 test.csv 的数据处理策略
 
@@ -301,7 +260,6 @@ f(x) = log(x + 1)
     fillMissingModel = FillImputer(features=[:Age, :Fare], continuous_fill = e -> skipmissing(e) |> mode)
 
 
-<a id="orge896e0b"></a>
 
 ## 数据处理模型
 
@@ -338,7 +296,6 @@ f(x) = log(x + 1)
     output_sample = MLJ.transform(transformSampleMachine, origin_sample)
 
 
-<a id="org85cda60"></a>
 
 ## TODO 数据相关性
 
@@ -347,12 +304,10 @@ f(x) = log(x + 1)
 但是吧这个图像好像不是热力图，我还是先放着吧  
 
 
-<a id="orgf273675"></a>
 
 # 模型训练
 
 
-<a id="orgd55df76"></a>
 
 ## 引入模型
 
@@ -373,7 +328,6 @@ f(x) = log(x + 1)
 -   solver (Solver): type of solver to use, default if nothing.
 
 
-<a id="orgf352a58"></a>
 
 ## 拆解数据
 
@@ -387,7 +341,6 @@ f(x) = log(x + 1)
     train_row, test_row = partition(eachindex(Y), 0.7, rng=rng)
 
 
-<a id="org5e54ce1"></a>
 
 ## 模型训练与调试
 
@@ -445,7 +398,6 @@ f(x) = log(x + 1)
 ![img](images/titanic/2021-08-19_00-42-26_screenshot.png)  
 
 
-<a id="org72b5566"></a>
 
 # 投入使用
 
@@ -454,14 +406,12 @@ MLJ为分类结果定义了两种情况，一种是概率的，一种是二分�
 生成数据的最后还需要处理一遍  
 
 
-<a id="orgb06b911"></a>
 
 ## 加载数据
 
     origin_sample = CSV.read("data/test.csv", DataFrame)
 
 
-<a id="orgb950f85"></a>
 
 ## 处理数据
 
@@ -477,7 +427,6 @@ MLJ为分类结果定义了两种情况，一种是概率的，一种是二分�
     output_sample = MLJ.transform(transformSampleMachine, origin_sample)
 
 
-<a id="orgb0aa8ba"></a>
 
 ## 生成预测结果
 
@@ -495,7 +444,6 @@ MLJ为分类结果定义了两种情况，一种是概率的，一种是二分�
 mode 返回概率最大的数，在这里只有对0与1的概率  
 
 
-<a id="org601d791"></a>
 
 ## 上传数据
 

@@ -1,43 +1,9 @@
 
-# Table of Contents
-
-1.  [算法介绍](#orgcc49619)
-    1.  [基本算法](#orgde824bd)
-    2.  [l2 约束](#org1fe4147)
-    3.  [l1 约束](#orge1c534e)
-    4.  [l1 + l2 约束](#org1f95374)
-2.  [MLJLinearModels 使用](#orgd78e284)
-    1.  [Ridge](#orgf648b57)
-    2.  [Lasso](#org92bae0b)
-    3.  [Elastic-Net](#org7cc67dc)
-    4.  [说明](#orgb91c8f9)
-3.  [实例 波士顿房价预测](#org4d77fba)
-    1.  [数据准备](#orgb42a407)
-    2.  [观察各项主要特征与房价售价的关系](#org123c060)
-        1.  [[存疑]分析 SalePrice](#org078af52)
-        2.  [分析特征数据](#orga9e09ae)
-        3.  [验证主要特征是否满足要求](#org1b8954f)
-        4.  [主要特征](#org4bb1489)
-    3.  [更加科学的分析数据](#orgd322d84)
-        1.  [关系矩阵](#orga20f62b)
-        2.  [[存疑]房价关系矩阵](#org5b43fbc)
-        3.  [[存疑]绘制关系点图](#org2d89871)
-    4.  [开始模拟数据](#orgd9a83a4)
-        1.  [处理数据](#org4300146)
-        2.  [模型训练](#orgea30520)
-        3.  [补充: lightGBM 模型训练](#orgccc6699)
-    5.  [检验测试集数据](#orgdeb9d9e)
-
-
-
-<a id="orgcc49619"></a>
-
 # 算法介绍
 
 这里简要介绍下各算法和他们之间的关系，详细理解请百度一下  
 
 
-<a id="orgde824bd"></a>
 
 ## 基本算法
 
@@ -46,7 +12,6 @@
 单纯的最小二乘法对于包含噪声的学习过程经常有过拟合的弱点，这往往是由于学习模型对于训练样本而言过于复杂  
 
 
-<a id="org1fe4147"></a>
 
 ## l2 约束
 
@@ -56,7 +21,6 @@
 然而，当参数特别多的时候，求解各参数以及学习得到的函数的输出值的过程，都需要耗费大量的时间  
 
 
-<a id="orge1c534e"></a>
 
 ## l1 约束
 
@@ -64,7 +28,6 @@
 因为大部分参数都变成了0，所以就可以快速地求解各参数以及学习得到的函数的输出值  
 
 
-<a id="org1f95374"></a>
 
 ## l1 + l2 约束
 
@@ -84,12 +47,10 @@
 </div>
 
 
-<a id="orgd78e284"></a>
 
 # MLJLinearModels 使用
 
 
-<a id="orgf648b57"></a>
 
 ## Ridge
 
@@ -101,7 +62,6 @@ $J = \frac{1}{n}\sum_{i = 1}^n (f( x_i) - y_i)^2 + \lambda \|w\|_2^2\tag{1}$
     RidgeRegression(λ; lambda, fit_intercept, penalize_intercept, scale_penalty_with_samples)
 
 
-<a id="org92bae0b"></a>
 
 ## Lasso
 
@@ -113,7 +73,6 @@ $J = \frac{1}{n}\sum_{i = 1}^n (f( x_i) - y_i)^2 + \lambda \|w\|_1\tag{2}$
     LassoRegression(λ; lambda, fit_intercept, penalize_intercept, scale_penalty_with_samples)
 
 
-<a id="org7cc67dc"></a>
 
 ## Elastic-Net
 
@@ -125,7 +84,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
     ElasticNetRegression(λ, γ; lambda, gamma, fit_intercept, penalize_intercept, scale_penalty_with_samples)
 
 
-<a id="orgb91c8f9"></a>
 
 ## 说明
 
@@ -138,12 +96,10 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 总之，只用设置 `lambda` 就行了  
 
 
-<a id="org4d77fba"></a>
 
 # 实例 波士顿房价预测
 
 
-<a id="orgb42a407"></a>
 
 ## 数据准备
 
@@ -158,12 +114,10 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
     dataTest = CSV.read("data/test.csv", DataFrame)
 
 
-<a id="org123c060"></a>
 
 ## 观察各项主要特征与房价售价的关系
 
 
-<a id="org078af52"></a>
 
 ### [存疑]分析 SalePrice
 
@@ -191,7 +145,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 然而我还不会这个东西，放一放  
 
 
-<a id="orga9e09ae"></a>
 
 ### 分析特征数据
 
@@ -288,7 +241,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 </table>
 
 
-<a id="org1b8954f"></a>
 
 ### 验证主要特征是否满足要求
 
@@ -410,7 +362,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
         由上面点图可以看出房价与车库面积和容纳车辆数呈现线性关系，所以入选主要特征  
 
 
-<a id="org4bb1489"></a>
 
 ### 主要特征
 
@@ -493,7 +444,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 </table>
 
 
-<a id="orgd322d84"></a>
 
 ## 更加科学的分析数据
 
@@ -506,7 +456,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 -   绘制出最相关的特征之间的关系图
 
 
-<a id="orga20f62b"></a>
 
 ### 关系矩阵
 
@@ -537,7 +486,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 -   `GarageArea` 车库面积
 
 
-<a id="org5b43fbc"></a>
 
 ### [存疑]房价关系矩阵
 
@@ -590,19 +538,16 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 2.  `Dataframe` 的字段名也要根据数据排序进行修改吧？
 
 
-<a id="org2d89871"></a>
 
 ### [存疑]绘制关系点图
 
 目前找到一个 `PairPlots` 包，我还要研究一下  
 
 
-<a id="orgd9a83a4"></a>
 
 ## 开始模拟数据
 
 
-<a id="org4300146"></a>
 
 ### 处理数据
 
@@ -652,7 +597,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
         train, test = partition(eachindex(y), 0.8, rng=rng)
 
 
-<a id="orgea30520"></a>
 
 ### 模型训练
 
@@ -680,7 +624,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 ![img](images/regressor/2022-05-05_19-24-51_screenshot.png)  
 
 
-<a id="orgccc6699"></a>
 
 ### 补充: lightGBM 模型训练
 
@@ -706,7 +649,6 @@ $\smash{\min_{w}}\sum_{i=1}^m(y_i-\sum_{j=1}^dx_{ij}w_j)^2 + \lambda\sum_{j=1}^d
 ![img](images/regressor/2022-05-05_19-29-43_screenshot.png)  
 
 
-<a id="orgdeb9d9e"></a>
 
 ## 检验测试集数据
 

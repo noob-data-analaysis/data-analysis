@@ -1,18 +1,3 @@
-
-# Table of Contents
-
-1.  [介绍](#org09d1d13)
-2.  [实例](#orgb421b74)
-3.  [使用 MLJFlux 预测波士顿房价](#org09a1aaa)
-    1.  [准备](#org3427906)
-    2.  [数据处理](#org8c16ea6)
-    3.  [模型训练](#orgba06f68)
-    4.  [导出结果](#org35e518d)
-
-
-
-<a id="org09d1d13"></a>
-
 # 介绍
 
 [MLJFlux](https://github.com/FluxML/MLJFlux.jl) 就是 **MLJ** 框架对 **Flux** 的封装，由于我学不会 **Flux** ，所以我就退而求其次，学别人装好的工具  
@@ -111,8 +96,6 @@
 -   `alpha` 表示 l2/l1 混合的比例 ？
 
 
-<a id="orgb421b74"></a>
-
 # 实例
 
 对照上图，以分类问题为例，我们需要新建一个 builder 结构来表示隐藏层，  
@@ -168,14 +151,9 @@
 定义完模型，就像 MLJ 模型那样调用就好了  
 
 
-<a id="org09a1aaa"></a>
-
 # 使用 MLJFlux 预测波士顿房价
 
 ![img](images/mljflux/2.png)  
-
-
-<a id="org3427906"></a>
 
 ## 准备
 
@@ -196,7 +174,6 @@
     originData = CSV.read("data/titanic/train.csv", DataFrame)
 
 
-<a id="org8c16ea6"></a>
 
 ## 数据处理
 
@@ -281,7 +258,6 @@
     Y, X = unpack(outputData, colname -> colname == :Survived, colname -> true)
 
 
-<a id="orgba06f68"></a>
 
 ## 模型训练
 
@@ -324,7 +300,6 @@
     		    rows = testRow)
 
 
-<a id="org35e518d"></a>
 
 ## 导出结果
 
